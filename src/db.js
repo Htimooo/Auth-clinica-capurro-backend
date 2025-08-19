@@ -18,7 +18,8 @@ pool
     email TEXT UNIQUE,
     password TEXT,
     role TEXT,
-    resetToken TEXT
+    resetTokenHash TEXT,
+    resetTokenExpiry TIMESTAMPTZ
   )`)
   .catch(err => {
     console.error('Error initializing database', err);
@@ -40,24 +41,31 @@ module.exports = {
 
   async updatePassword(id, password) {
     await pool.query(
-      'UPDATE users SET password = $1, resetToken = NULL WHERE id = $2',
+      'UPDATE users SET password = $1, resetTokenHash = NULL, resetTokenExpiry = NULL WHERE id = $2',
       [password, id]
     );
   },
 
-  async setResetToken(id, token) {
+  async setResetToken(id, tokenHash, expiresAt) {
     await pool.query(
-      'UPDATE users SET resetToken = $1 WHERE id = $2',
-      [token, id]
+      'UPDATE users SET resetTokenHash = $1, resetTokenExpiry = $2 WHERE id = $3',
+      [tokenHash, expiresAt, id]
     );
   },
 
-  async getUserByResetToken(token) {
+  async getUserByResetToken(tokenHash) {
     const res = await pool.query(
-      'SELECT * FROM users WHERE resetToken = $1',
-      [token]
+      'SELECT * FROM users WHERE resetTokenHash = $1',
+      [tokenHash]
     );
     return res.rows[0];
+  },
+
+  async clearResetToken(id) {
+    await pool.query(
+      'UPDATE users SET resetTokenHash = NULL, resetTokenExpiry = NULL WHERE id = $1',
+      [id]
+    );
   }
 };
 

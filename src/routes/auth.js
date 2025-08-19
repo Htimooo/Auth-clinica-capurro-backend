@@ -3,6 +3,9 @@ const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
 const db = require('../db');
 const { generateToken, authMiddleware } = require('../auth');
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
+const config = require('../config');
 
 const router = express.Router();
 
@@ -61,12 +64,56 @@ router.post('/forgot-password', async (req, res) => {
   if (!email) return res.status(400).json({ message: 'Missing email' });
   try {
     const user = await db.getUserByEmail(email);
-    if (!user) return res.json({ message: 'If that account exists, a reset token has been generated' });
+    if (!user) return res.json({ message: 'If that account exists, a reset email has been sent' });
     const token = uuidv4();
-    await db.setResetToken(user.id, token);
-    res.json({ message: 'Password reset initiated', resetToken: token });
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const expiresAt = new Date(Date.now() + 3600000);
+    await db.setResetToken(user.id, tokenHash, expiresAt);
+
+    try {
+      if (config.email && config.email.host) {
+        const transporter = nodemailer.createTransport({
+          host: config.email.host,
+          port: config.email.port,
+          auth: config.email.user ? { user: config.email.user, pass: config.email.pass } : undefined
+        });
+        await transporter.sendMail({
+          from: config.email.from || config.email.user,
+          to: email,
+          subject: 'Password Reset',
+          text: `Use this token to reset your password: ${token}`
+        });
+      } else {
+        console.log(`Reset token for ${email}: ${token}`);
+      }
+    } catch (mailErr) {
+      console.error('Error sending reset email', mailErr);
+    }
+
+    res.json({ message: 'Password reset initiated' });
   } catch (err) {
     res.status(500).json({ message: 'Forgot password failed' });
+  }
+});
+
+router.post('/reset-password', async (req, res) => {
+  const { token, password } = req.body;
+  if (!token || !password) return res.status(400).json({ message: 'Missing token or password' });
+  try {
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const user = await db.getUserByResetToken(tokenHash);
+    if (!user || !user.resetTokenExpiry) {
+      return res.status(400).json({ message: 'Invalid or expired token' });
+    }
+    if (new Date(user.resetTokenExpiry) < new Date()) {
+      await db.clearResetToken(user.id);
+      return res.status(400).json({ message: 'Invalid or expired token' });
+    }
+    const hash = await bcrypt.hash(password, 10);
+    await db.updatePassword(user.id, hash);
+    res.json({ message: 'Password updated' });
+  } catch (err) {
+    res.status(500).json({ message: 'Reset password failed' });
   }
 });
 
