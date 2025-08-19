@@ -2,7 +2,6 @@ const required = [
   'GOOGLE_CLIENT_ID',
   'GOOGLE_CLIENT_SECRET',
   'JWT_SECRET',
-  'PASSWORD_SECRET',
   'DB_HOST',
   'DB_PORT',
   'DB_USER',
@@ -20,7 +19,6 @@ module.exports = {
   googleClientId: process.env.GOOGLE_CLIENT_ID,
   googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
   jwtSecret: process.env.JWT_SECRET,
-  passwordSecret: process.env.PASSWORD_SECRET,
   db: {
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
