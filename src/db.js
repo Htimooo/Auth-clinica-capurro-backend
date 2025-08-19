@@ -1,13 +1,14 @@
 const { Pool } = require('pg');
+const { db: dbConfig } = require('./config');
 
 // Create a connection pool using environment variables for configuration.
 // Required variables: DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME
 const pool = new Pool({
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME
+  host: dbConfig.host,
+  port: dbConfig.port,
+  user: dbConfig.user,
+  password: dbConfig.password,
+  database: dbConfig.name
 });
 
 // Initialize the schema if it does not exist.

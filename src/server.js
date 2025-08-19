@@ -1,3 +1,5 @@
+require('dotenv').config();
+const config = require('./config');
 const express = require('express');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
@@ -7,8 +9,8 @@ const { generateToken } = require('./auth');
 const db = require('./db');
 
 passport.use(new GoogleStrategy({
-  clientID: process.env.GOOGLE_CLIENT_ID || '',
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+  clientID: config.googleClientId,
+  clientSecret: config.googleClientSecret,
   callbackURL: '/oauth/google/callback'
 }, async (accessToken, refreshToken, profile, done) => {
   try {
@@ -35,5 +37,5 @@ app.get('/oauth/google/callback', passport.authenticate('google', { session: fal
   res.json({ email: req.user.email, token, role: req.user.role });
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = config.port;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
