@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+    branches: [ "**" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+      - run: npm install
+      - run: npm test
+        env:
+          GOOGLE_CLIENT_ID: test
+          GOOGLE_CLIENT_SECRET: test
+          JWT_SECRET: testsecret
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USER: user
+          DB_PASSWORD: password
+          DB_NAME: testdb
+
