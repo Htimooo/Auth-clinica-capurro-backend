@@ -26,3 +26,28 @@ export DB_NAME=mydatabase
 Configure these variables in your production environment so the API can connect
 to the correct database instance.
 
+## Security configuration
+
+The server uses [helmet](https://github.com/helmetjs/helmet) and
+[cors](https://github.com/expressjs/cors) for basic security hardening.
+
+### CORS origins
+
+Allowed origins can be specified via the `CORS_ORIGINS` environment variable.
+Provide a comma-separated list of origins when `NODE_ENV=production`.
+During development all origins are allowed by default.
+
+Example configuration:
+
+```bash
+# Development
+export NODE_ENV=development
+
+# Production
+export NODE_ENV=production
+export CORS_ORIGINS=https://app.example.com,https://admin.example.com
+```
+
+Adjust these variables for each environment to control who can access the API
+and to fine-tune security headers.
+
