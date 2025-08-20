@@ -1,6 +1,8 @@
 require('dotenv').config();
 const config = require('./config');
 const express = require('express');
+const helmet = require('helmet');
+const cors = require('cors');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const { v4: uuidv4 } = require('uuid');
@@ -27,6 +29,13 @@ passport.use(new GoogleStrategy({
 }));
 
 const app = express();
+
+const allowedOrigins = process.env.NODE_ENV === 'production' && process.env.CORS_ORIGINS
+  ? process.env.CORS_ORIGINS.split(',')
+  : '*';
+
+app.use(helmet());
+app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
 app.use(passport.initialize());
 app.use('/', authRoutes);
