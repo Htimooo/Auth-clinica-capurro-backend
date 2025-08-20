@@ -47,4 +47,8 @@ app.get('/oauth/google/callback', passport.authenticate('google', { session: fal
 });
 
 const PORT = config.port;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+if (require.main === module) {
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}
+
+module.exports = app;

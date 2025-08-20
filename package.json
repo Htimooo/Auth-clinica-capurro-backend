@@ -5,7 +5,7 @@
   "type": "commonjs",
   "scripts": {
     "start": "node src/server.js",
-    "test": "echo \"No tests specified\" && exit 0"
+    "test": "node --test"
   },
   "dependencies": {
     "dotenv": "^16.4.5",
@@ -20,5 +20,9 @@
     "nodemailer": "^6.9.8",
     "helmet": "^7.0.0",
     "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3"
   }
 }
