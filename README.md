@@ -26,6 +26,16 @@ export DB_NAME=mydatabase
 Configure these variables in your production environment so the API can connect
 to the correct database instance.
 
+## AWS Secrets Manager
+
+In production you can store sensitive configuration in [AWS Secrets Manager](https://aws.amazon.com/secrets-manager/).
+
+1. Create a secret containing keys such as `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` and `JWT_SECRET`.
+2. Attach an IAM role to the EC2 instance that allows `secretsmanager:GetSecretValue`.
+3. Set `AWS_REGION` and `SECRET_ID` environment variables on the instance. `SECRET_ID` should match the name or ARN of the secret you created.
+
+At startup the app uses the AWS SDK to retrieve the secret and populate `process.env` before launching the server. Local development can still use a traditional `.env` file.
+
 ## Security configuration
 
 The server uses [helmet](https://github.com/helmetjs/helmet) and
